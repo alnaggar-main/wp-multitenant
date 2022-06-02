@@ -7,8 +7,6 @@
  * @version 1.0
  *
  */
-define('DB_USER', getenv('DB_USER'));
-define('DB_PASSWORD', getenv('DB_PASSWORD'));
 define('DB_HOST', getenv('DB_HOST'));
 define('DB_CHARSET', 'utf8');
 define('DB_COLLATE', '');

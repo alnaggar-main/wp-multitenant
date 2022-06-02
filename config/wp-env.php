@@ -19,8 +19,6 @@ $dotenv = Dotenv\Dotenv::create(__DIR__);
 $dotenv->load();
 $dotenv->required(
     [
-        'DB_USER',
-        'DB_PASSWORD',
         'DB_HOST',
         'ENV_MULTISITE',
         'ENV_CURRENT_ENV',
