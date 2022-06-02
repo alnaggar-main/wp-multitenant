@@ -1,5 +1,5 @@
 {
-	"name": "alnaggar94/wp-multitenant",
+	"name": "alnaggar-main/wp-multitenant",
 	"description": "Composer setup for a WordPress Multi Tenant environment",
 	"minimum-stability": "dev",
 	"prefer-stable": true,
@@ -8,7 +8,6 @@
 		"composer/installers": "1.*",
 		"johnpbloch/wordpress": "*",
 		"vlucas/phpdotenv": "3.4.0",
-		"alnaggar94/litespeed-cache": "4.4.3",
 		"wpackagist-theme/twentytwentyone": "@stable",
 		"wpackagist-plugin/debug-bar": "*",
 		"wpackagist-plugin/query-monitor": "*"
@@ -17,11 +16,8 @@
 		{
 			"type": "composer",
 			"url": "https://wpackagist.org"
-		},
-		{
-			"type": "vcs",
-			"url": "https://github.com/alnaggar94/litespeed-cache"
 		}
+
 	],
 	"extra": {
 		"wordpress-install-dir": "app/stable",
