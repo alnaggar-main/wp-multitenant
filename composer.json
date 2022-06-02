@@ -9,7 +9,6 @@
 		"johnpbloch/wordpress": "*",
 		"vlucas/phpdotenv": "3.4.0",
 		"wpackagist-theme/twentytwentyone": "@stable",
-		"wpackagist-plugin/debug-bar": "*",
 		"wpackagist-plugin/query-monitor": "*"
 	},
 	"repositories": [
