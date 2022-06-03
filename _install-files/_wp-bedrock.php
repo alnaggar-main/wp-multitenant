@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name:  Bedrock Autoloader
- * Plugin URI:   https://github.com/roots/bedrock/
+ * Plugin URI:   https://github.com/roots/bedrock-autoloader
  * Description:  An autoloader that enables standard plugins to be required just like must-use plugins. The autoloaded plugins are included during mu-plugin loading. An asterisk (*) next to the name of the plugin designates the plugins that have been autoloaded.
- * Version:      1.0.1
+ * Version:      1.0.3
  * Author:       Roots
  * Author URI:   https://roots.io/
  * License:      MIT License
@@ -14,7 +14,6 @@ namespace Roots\Bedrock;
 if (!is_blog_installed()) {
     return;
 }
-
 /**
  * Class Autoloader
  * @package Roots\Bedrock
@@ -23,59 +22,29 @@ if (!is_blog_installed()) {
  */
 class Autoloader
 {
-    /**
-     * Singleton instance.
-     *
-     * @var static
-     */
+    /** @var static Singleton instance */
     private static $instance;
 
-    /**
-     * Store Autoloader cache and site option.
-     *
-     * @var array
-     */
+    /** @var array Store Autoloader cache and site option */
     private $cache;
 
-    /**
-     * Autoloaded plugins.
-     *
-     * @var array
-     */
+    /** @var array Autoloaded plugins */
     private $autoPlugins;
 
-    /**
-     * Autoloaded mu-plugins.
-     *
-     * @var array
-     */
+    /** @var array Autoloaded mu-plugins */
     private $muPlugins;
 
-    /**
-     * Number of plugins.
-     *
-     * @var int
-     */
+    /** @var int Number of plugins */
     private $count;
 
-    /**
-     * Newly activated plugins.
-     *
-     * @var array
-     */
+    /** @var array Newly activated plugins */
     private $activated;
 
-    /**
-     * Relative path to the mu-plugins directory.
-     *
-     * @var string
-     */
+    /** @var string Relative path to the mu-plugins dir */
     private $relativePath;
 
     /**
-     * Create an instance of Autoloader.
-     *
-     * @return void
+     * Create singleton, populate vars, and set WordPress hooks
      */
     public function __construct()
     {
@@ -85,7 +54,7 @@ class Autoloader
 
         self::$instance = $this;
 
-        $this->relativePath = '/../' . basename(__DIR__);
+        $this->relativePath = '/../' . basename(WPMU_PLUGIN_DIR);
 
         if (is_admin()) {
             add_filter('show_advanced_plugins', [$this, 'showInAdmin'], 0, 2);
@@ -96,8 +65,6 @@ class Autoloader
 
    /**
     * Run some checks then autoload our plugins.
-    *
-    * @return void
     */
     public function loadPlugins()
     {
@@ -109,15 +76,15 @@ class Autoloader
             include_once WPMU_PLUGIN_DIR . '/' . func_get_args()[0];
         }, array_keys($this->cache['plugins']));
 
-        $this->pluginHooks();
+        add_action('plugins_loaded', [$this, 'pluginHooks'], -9999);
     }
 
     /**
      * Filter show_advanced_plugins to display the autoloaded plugins.
-     *
-     * @param  bool    $show Whether to show the advanced plugins for the specified plugin type.
-     * @param  string  $type The plugin type, i.e., `mustuse` or `dropins`
-     * @return bool    We return `false` to prevent WordPress from overriding our work
+     * @param $show bool Whether to show the advanced plugins for the specified plugin type.
+     * @param $type string The plugin type, i.e., `mustuse` or `dropins`
+     * @return bool We return `false` to prevent WordPress from overriding our work
+     * {@internal We add the plugin details ourselves, so we return false to disable the filter.}
      */
     public function showInAdmin($show, $type)
     {
@@ -142,8 +109,6 @@ class Autoloader
 
     /**
      * This sets the cache or calls for an update
-     *
-     * @return void
      */
     private function checkCache()
     {
@@ -158,13 +123,9 @@ class Autoloader
     }
 
     /**
-     * Update mu-plugin cache.
-     *
      * Get the plugins and mu-plugins from the mu-plugin path and remove duplicates.
      * Check cache against current plugins for newly activated plugins.
      * After that, we can update the cache.
-     *
-     * @return void
      */
     private function updateCache()
     {
@@ -173,7 +134,7 @@ class Autoloader
         $this->autoPlugins = get_plugins($this->relativePath);
         $this->muPlugins   = get_mu_plugins();
         $plugins           = array_diff_key($this->autoPlugins, $this->muPlugins);
-        $rebuild           = !(isset($this->cache['plugins']) && is_array($this->cache['plugins']));
+        $rebuild           = !isset($this->cache['plugins']);
         $this->activated   = $rebuild ? $plugins : array_diff_key($plugins, $this->cache['plugins']);
         $this->cache       = ['plugins' => $plugins, 'count' => $this->countPlugins()];
 
@@ -181,15 +142,11 @@ class Autoloader
     }
 
     /**
-     * Activate plugin hooks.
-     *
      * This accounts for the plugin hooks that would run if the plugins were
      * loaded as usual. Plugins are removed by deletion, so there's no way
      * to deactivate or uninstall.
-     *
-     * @return void
      */
-    private function pluginHooks()
+    public function pluginHooks()
     {
         if (!is_array($this->activated)) {
             return;
@@ -202,8 +159,6 @@ class Autoloader
 
     /**
      * Check that the plugin file exists, if it doesn't update the cache.
-     *
-     * @return void
      */
     private function validatePlugins()
     {
